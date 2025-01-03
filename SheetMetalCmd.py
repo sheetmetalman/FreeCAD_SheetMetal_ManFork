@@ -134,6 +134,7 @@ def GetSMComparisonFace (smObj, smSelItemName): # Calculations for Angle and Off
 
     parallel_faces = Part.Shell(parallel_faces)
 
+    # Get only the relevant parallel faces:
     if type(smSelItem) == Part.Face:
         newParFaces = []
         for edge1 in smSelItem.Edges:
@@ -171,7 +172,9 @@ def GetSMComparisonFace (smObj, smSelItemName): # Calculations for Angle and Off
             extFace = newParFaces[0]
 
             refVectorXY = FreeCAD.Vector(extFace.normalAt(0,0).x, extFace.normalAt(0,0).y, 0)
-            angleTest = extFace.normalAt(0,0).getAngle(refVectorXY)
+            angleTest = math.degrees(extFace.normalAt(0,0).getAngle(refVectorXY))
+            refVectorZ = FreeCAD.Vector(0,0,extFace.normalAt(0,0).z)
+            angleTestZ = math.degrees(extFace.normalAt(0,0).getAngle(refVectorZ))
 
             extFaceNormal = False
             if extFace.normalAt(0,0).x <= 0 and extFace.normalAt(0,0).y <= 0:
@@ -179,13 +182,15 @@ def GetSMComparisonFace (smObj, smSelItemName): # Calculations for Angle and Off
             elif extFace.normalAt(0,0).x >= 0 and extFace.normalAt(0,0).y >= 0:
                 extFaceNormal = True
             
-            if extFaceNormal == True and (angleTest == 0.0 or angleTest == math.radians(180)):
+            if extFaceNormal == True and ((angleTest == 0.0 or angleTest == 180) or (angleTestZ == 0.0 or angleTestZ == 180)):
                 extFace = newParFaces[1]
         elif distA < distB:
             extFace = newParFaces[1]
 
             refVectorXY = FreeCAD.Vector(extFace.normalAt(0,0).x, extFace.normalAt(0,0).y, 0)
-            angleTest = extFace.normalAt(0,0).getAngle(refVectorXY)
+            angleTest = math.degrees(extFace.normalAt(0,0).getAngle(refVectorXY))
+            refVectorZ = FreeCAD.Vector(0,0,extFace.normalAt(0,0).z)
+            angleTestZ = math.degrees(extFace.normalAt(0,0).getAngle(refVectorZ))
 
             extFaceNormal = False
             if extFace.normalAt(0,0).x <= 0 and extFace.normalAt(0,0).y <= 0:
@@ -193,7 +198,7 @@ def GetSMComparisonFace (smObj, smSelItemName): # Calculations for Angle and Off
             elif extFace.normalAt(0,0).x >= 0 and extFace.normalAt(0,0).y >= 0:
                 extFaceNormal = True
 
-            if extFaceNormal == True and (angleTest == 0.0 or angleTest == math.radians(180)):
+            if extFaceNormal == True and ((angleTest == 0.0 or angleTest == 180) or (angleTestZ == 0.0 or angleTestZ == 180)):
                 extFace = newParFaces[0]
 
         if distA == distB:
@@ -203,7 +208,9 @@ def GetSMComparisonFace (smObj, smSelItemName): # Calculations for Angle and Off
                 extFace = newParFaces[0]
 
                 refVectorXY = FreeCAD.Vector(extFace.normalAt(0,0).x, extFace.normalAt(0,0).y, 0)
-                angleTest = extFace.normalAt(0,0).getAngle(refVectorXY)
+                angleTest = math.degrees(extFace.normalAt(0,0).getAngle(refVectorXY))
+                refVectorZ = FreeCAD.Vector(0,0,extFace.normalAt(0,0).z)
+                angleTestZ = math.degrees(extFace.normalAt(0,0).getAngle(refVectorZ))
 
                 extFaceNormal = False
                 if extFace.normalAt(0,0).x <= 0 and extFace.normalAt(0,0).y <= 0:
@@ -211,13 +218,15 @@ def GetSMComparisonFace (smObj, smSelItemName): # Calculations for Angle and Off
                 elif extFace.normalAt(0,0).x >= 0 and extFace.normalAt(0,0).y >= 0:
                     extFaceNormal = True
                 
-                if extFaceNormal == True and (angleTest == 0.0 or angleTest == math.radians(180)):
+                if extFaceNormal == True and ((angleTest == 0.0 or angleTest == 180) or (angleTestZ == 0.0 or angleTestZ == 180)):
                     extFace = newParFaces[1]
             else:
                 extFace = newParFaces[1]
 
                 refVectorXY = FreeCAD.Vector(extFace.normalAt(0,0).x, extFace.normalAt(0,0).y, 0)
-                angleTest = extFace.normalAt(0,0).getAngle(refVectorXY)
+                angleTest = math.degrees(extFace.normalAt(0,0).getAngle(refVectorXY))
+                refVectorZ = FreeCAD.Vector(0,0,extFace.normalAt(0,0).z)
+                angleTestZ = math.degrees(extFace.normalAt(0,0).getAngle(refVectorZ))
 
                 extFaceNormal = False
                 if extFace.normalAt(0,0).x <= 0 and extFace.normalAt(0,0).y <= 0:
@@ -225,7 +234,7 @@ def GetSMComparisonFace (smObj, smSelItemName): # Calculations for Angle and Off
                 elif extFace.normalAt(0,0).x >= 0 and extFace.normalAt(0,0).y >= 0:
                     extFaceNormal = True
                 
-                if extFaceNormal == True and (angleTest == 0.0 or angleTest == math.radians(180)):
+                if extFaceNormal == True and ((angleTest == 0.0 or angleTest == 180) or (angleTestZ == 0.0 or angleTestZ == 180)):
                     extFace = newParFaces[0]
 
         thkFace = smSelItem
@@ -302,6 +311,7 @@ def offsetFaceDistance (smFace, refFace, refEdge, thkFace): # Calculations for O
     refPlane = Part.Plane(refFace.CenterOfMass, refFace.normalAt(0,0))
 
     interLine = smPlane.intersect(refPlane)[0] # Intersection line between the planes of sheet metal and the reference
+    #offsetDist = interLine.toShape().distToShape(refEdge)[0]
     offsetDist = get_lowest_normal_distance_to_line(thkFace, interLine) # Get the distance between the intersection of the planes and the edge
 
     # Test if is necessary negative offset:
@@ -2070,15 +2080,12 @@ class SMBendWall:
 
                     if angFaceNormal.isEqual(refFaceNormal, 1e-6) or angFaceNormal.isEqual(-refFaceNormal, 1e-6):
                         fp.angle.Value = angle
-                        angleParFace = angle
                         if fp.invert == True:
                             fp.angle.Value = 180 - angle
-                            angleParFace = 180 - angle
                         break
 
-                if fp.SupplAngleRef == True: # Supplmentary angle option
+                if fp.SupplAngleRef == True: # Supplementary angle option
                     fp.angle.Value = 180 - fp.angle.Value
-                    angleParFace = 180 - angleParFace
 
         # Calculate the offset based on reference face:
         if fp.BendType == "Offset" and fp.OffsetFaceRefMode == True:
@@ -2122,7 +2129,7 @@ class SMBendWall:
                             angleParFace = 180 - angle
                         break
                 
-                if fp.SupplAngleRef == True: # Supplmentary angle option
+                if fp.SupplAngleRef == True: # Supplementary angle option
                     angleParFace = 180 - angleParFace
 
                 # Calculate the distance for the wall position:
